@@ -18,6 +18,10 @@ contract ToDoList {
     string content,
     bool completed
 );
+    event TaskCompleted (
+        uint id,
+        bool completed
+    );
     // a database for us
     // an id for the task that maps to the Task data type 
     // solidity gives a reader function for all public variables. 
@@ -38,5 +42,12 @@ contract ToDoList {
 
     }
 
+    function toggleCompleted(uint _id) public {
+        require(_id < taskCount, "Invalid ID");
+        Task memory _task = tasks[_id];
+        _task.completed = !_task.completed;
+        tasks[_id] = _task;
 
+        emit TaskCompleted (_id, _task.completed);
+    }
 }

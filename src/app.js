@@ -13,12 +13,14 @@ App = {
     if (typeof window.web3 !== "undefined") {
       web3 = new Web3(window.web3.currentProvider);
       App.web3Provider = window.web3.currentProvider;
+      // web3.eth.defaultAccount = window.web3.eth.defaultAccount;
     } else {
       window.alert("Please connect to Metamask.");
     }
     //Modern dapp browsers...
     if (window.ethereum) {
       window.web3 = new Web3(ethereum);
+      // web3.eth.defaultAccount = window.web3.eth.defaultAccount;
       try {
         // request account access if needed
         await ethereum.eth_requestAccounts();
@@ -30,6 +32,7 @@ App = {
     else if (window.web3) {
       App.web3Provider = currentProvider;
       window.web3 = new web3(currentProvider);
+      // web3.eth.defaultAccount = window.web3.eth.defaultAccount;
       eth.sendTransaction({});
     }
     // Non-dapp browsers...
@@ -40,10 +43,10 @@ App = {
     }
   },
   loadAccount: async () => {
+    App.account = web3.eth.accounts[0]
     web3.eth.defaultAccount = web3.eth.accounts[0]
-    App.account = web3.eth.accounts[0];
-    console.log(App.account);
   },
+
   loadContract: async() => {
     const todoList = await $.getJSON("TodoList.json")
     App.contracts.TodoList = TruffleContract(todoList)
@@ -70,6 +73,12 @@ App = {
     const content = $('#newTask').val()
     await App.todoList.createTask(content)
     window.location.reload() // refresh the page
+  },
+  toggleCompleted: async (e) => {
+    App.setLoading(true)
+    const taskId = e.target.name
+    await App.todoList.toggleCompleted(taskId)
+    window.location.reload()
   },
   setLoading: (boolean) => {
     App.loading = boolean;
@@ -104,7 +113,7 @@ App = {
 
        const $newTaskTemplate = $taskTemplate.clone()
        $newTaskTemplate.find('.content').html(taskContent)
-       $newTaskTemplate.find('input').prop('name', taskId).prop('checked', taskCompleted) //.on('click', App.toggleCompleted)
+       $newTaskTemplate.find('input').prop('name', taskId).prop('checked', taskCompleted).on('click', App.toggleCompleted)
 
        if(taskCompleted){
          $('#completedTaskList').append($newTaskTemplate)
